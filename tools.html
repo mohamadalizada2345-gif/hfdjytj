@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MAZ Tools</title>
+<link rel="stylesheet" href="style.css">
+<style>
+body{font-family:Arial,sans-serif;background:#07111f;color:#fff;margin:0}
+.container{width:90%;max-width:1100px;margin:auto}
+header{padding:20px 0;border-bottom:1px solid #263750}
+.logo{font-size:25px;font-weight:bold;color:white;text-decoration:none}
+.logo span{color:#22d3ee}
+h1{text-align:center;margin:35px 0}
+.tools{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px}
+.tool{background:#101e32;border:1px solid #263750;border-radius:14px;padding:20px;min-width:0}
+h2{color:#22d3ee;font-size:21px}
+input,textarea,select{width:100%;box-sizing:border-box;padding:11px;margin:8px 0 15px;background:#07111f;color:white;border:1px solid #40516b;border-radius:7px}
+textarea{min-height:100px}
+button,.download{display:inline-block;padding:11px 15px;background:#3b82f6;color:white;border:0;border-radius:7px;cursor:pointer;text-decoration:none;margin:4px 0}
+.result{margin-top:15px;overflow-wrap:anywhere}
+.result img{max-width:100%;height:auto;background:white}
+.note{font-size:12px;color:#a6b4c8}
+.back{text-align:center;padding:30px}
+a{color:#22d3ee}
+</style>
+</head>
+<body>
+
+<header>
+<div class="container">
+<a href="index.html" class="logo">MAZ<span> Tools</span></a>
+</div>
+</header>
+
+<main class="container">
+<h1>All Three Tools</h1>
+
+<div class="tools">
+
+<!-- TOOL 1: QR CODE -->
+<section class="tool">
+<h2>1. QR Code Generator</h2>
+<p>Create a QR code from a link or text.</p>
+
+<form id="qrForm">
+<input id="qrText" placeholder="Enter a website or text" required>
+<button type="submit">Generate QR</button>
+</form>
+
+<div id="qrResult" class="result"></div>
+</section>
+
+<!-- TOOL 2: CONTENT CREATOR -->
+<section class="tool">
+<h2>2. Content Creator</h2>
+<p>Create basic titles, captions, descriptions and hashtags.</p>
+
+<label for="contentType">Content type</label>
+<select id="contentType">
+<option value="title">Video Title</option>
+<option value="caption">Social Media Caption</option>
+<option value="description">Video Description</option>
+<option value="hashtags">Hashtags</option>
+</select>
+
+<label for="topic">Your topic</label>
+<textarea id="topic" placeholder="Example: Volleyball training"></textarea>
+
+<button id="generateContent" type="button">Create Content</button>
+<button id="copyContent" type="button">Copy Text</button>
+
+<div id="contentResult" class="result"></div>
+<p class="note">This basic tool uses templates; AI writing is not connected.</p>
+</section>
+
+<!-- TOOL 3: IMAGE TOOL -->
+<section class="tool">
+<h2>3. Image Resizer</h2>
+<p>Resize images and download them as PNG or JPEG.</p>
+
+<label for="imageFile">Choose an image</label>
+<input type="file" id="imageFile" accept="image/*">
+
+<label for="imageWidth">Width (pixels)</label>
+<input type="number" id="imageWidth" min="1" max="8000" placeholder="1280">
+
+<label for="imageHeight">Height (pixels)</label>
+<input type="number" id="imageHeight" min="1" max="8000" placeholder="720">
+
+<label for="imageFormat">Output format</label>
+<select id="imageFormat">
+<option value="image/png">PNG</option>
+<option value="image/jpeg">JPEG</option>
+</select>
+
+<button type="button" id="resizeImage">Resize and Convert</button>
+<div id="imageResult" class="result"></div>
+</section>
+
+</div>
+
+<div class="back">
+<a href="index.html">Back to Home</a>
+</div>
+</main>
+
+<script>
+// QR CODE GENERATOR
+document.getElementById("qrForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+
+    const text = document.getElementById("qrText").value.trim();
+    const result = document.getElementById("qrResult");
+    result.replaceChildren();
+
+    if (!text) {
+        result.textContent = "Enter a link or text first.";
+        return;
+    }
+
+    const img = document.createElement("img");
+    img.alt = "Generated QR code";
+    img.src = "https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=" + encodeURIComponent(text);
+
+    const link = document.createElement("a");
+    link.className = "download";
+    link.href = img.src;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    link.textContent = "Open QR Code";
+
+    result.append(img, link);
+});
+
+// CONTENT CREATOR
+const contentResult = document.getElementById("contentResult");
+
+document.getElementById("generateContent").addEventListener("click", function() {
+    const topic = document.getElementById("topic").value.trim();
+    const type = document.getElementById("contentType").value;
+
+    if (!topic) {
+        contentResult.textContent = "Please enter a topic.";
+        return;
+    }
+
+    let output = "";
+
+    if (type === "title") {
+        output = topic + " | Complete Guide for Beginners";
+    } else if (type === "caption") {
+        output = "Discover " + topic + "! Follow for more useful content.";
+    } else if (type === "description") {
+        output = "In this video, we explore " + topic +
+            ". Watch until the end and share your thoughts in the comments.";
+    } else if (type === "hashtags") {
+        output = topic.split(/\s+/)
+            .filter(Boolean)
+            .map(word => "#" + word.replace(/[^\p{L}\p{N}_]/gu, ""))
+            .filter(word => word.length > 1)
+            .join(" ") + " #Tips #Tutorial";
+    }
+
+    contentResult.textContent = output;
+});
+
+document.getElementById("copyContent").addEventListener("click", async function() {
+    const text = contentResult.textContent;
+
+    if (!text) {
+        alert("Generate content first.");
+        return;
+    }
+
+    try {
+        await navigator.clipboard.writeText(text);
+        alert("Text copied!");
+    } catch {
+        alert("Please select and copy the text manually.");
+    }
+});
+
+// IMAGE RESIZER
+let chosenImage = null;
+
+document.getElementById("imageFile").addEventListener("change", function() {
+    const file = this.files[0];
+    const result = document.getElementById("imageResult");
+    result.replaceChildren();
+    chosenImage = null;
+
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+        result.textContent = "Please select an image file.";
+        return;
+    }
+
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+
+    img.onload = function() {
+        chosenImage = img;
+        document.getElementById("imageWidth").value = img.naturalWidth;
+        document.getElementById("imageHeight").value = img.naturalHeight;
+        result.textContent = "Image loaded: " + img.naturalWidth + " × " + img.naturalHeight;
+        URL.revokeObjectURL(url);
+    };
+
+    img.onerror = function() {
+        result.textContent = "Could not open the image.";
+        URL.revokeObjectURL(url);
+    };
+
+    img.src = url;
+});
+
+document.getElementById("resizeImage").addEventListener("click", function() {
+    const result = document.getElementById("imageResult");
+    result.replaceChildren();
+
+    if (!chosenImage) {
+        result.textContent = "Please choose an image first.";
+        return;
+    }
+
+    const width = Number(document.getElementById("imageWidth").value);
+    const height = Number(document.getElementById("imageHeight").value);
+    const format = document.getElementById("imageFormat").value;
+
+    if (!Number.isInteger(width) || !Number.isInteger(height) ||
+        width < 1 || height < 1 || width > 8000 || height > 8000) {
+        result.textContent = "Width and height must be between 1 and 8000.";
+        return;
+    }
+
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+
+    const context = canvas.getContext("2d");
+
+    if (format === "image/jpeg") {
+        context.fillStyle = "#ffffff";
+        context.fillRect(0, 0, width, height);
+    }
+
+    context.drawImage(chosenImage, 0, 0, width, height);
+
+    canvas.toBlob(function(blob) {
+        if (!blob) {
+            result.textContent = "Could not convert this image.";
+            return;
+        }
+
+        const url = URL.createObjectURL(blob);
+        const preview = document.createElement("img");
+        preview.src = url;
+        preview.alt = "Resized image preview";
+
+        const link = document.createElement("a");
+        link.className = "download";
+        link.href = url;
+        link.download = "maz-tools-image." +
+            (format === "image/jpeg" ? "jpg" : "png");
+        link.textContent = "Download Image";
+
+        result.append(preview, link);
+    }, format, format === "image/jpeg" ? 0.9 : undefined);
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,15 @@
+{
+  "name": "maz-tools",
+  "version": "1.0.0",
+  "description": "MAZ Tools website and payment verification server",
+  "main": "server/server.js",
+  "scripts": {
+    "start": "node server/server.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.57.0",
+    "dotenv": "^17.2.2",
+    "ethers": "^6.15.0",
+    "express": "^5.1.0"
+  }
+}
